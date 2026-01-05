@@ -49,6 +49,9 @@ fetch("pizzaer.json")
     // opret hver gruppe lodret
     Object.entries(grupper).forEach(([gruppeNavn, gruppePizzaer]) => {
 
+       // 🔽 SORTERING (DEN MANGLEDE DEL)
+  gruppePizzaer.sort((a, b) => a.nr - b.nr);
+
       const gruppeDiv = document.createElement("div");
       gruppeDiv.className = "pizza-gruppe";
 
