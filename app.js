@@ -262,7 +262,7 @@ function visSamletListe() {
       html += `• ${data.dressing} stk ${data.navn} med dressing<br>`;
     }
     if (data.uden > 0) {
-      html += `• ${data.uden} stk ${data.navn} uden<br>`;
+      html += `• ${data.uden} stk ${data.navn} <br>`;
     }
 
     // individuelle med kommentar
