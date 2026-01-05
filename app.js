@@ -166,7 +166,7 @@ function visBestillinger() {
     } else if (b.dressing) {
       tekst += " + dressing";
     } else {
-      tekst += " uden";
+      tekst += "";
     }
 
     if (b.kommentar) {
@@ -267,7 +267,7 @@ function visSamletListe() {
 
     // individuelle med kommentar
     data.special.forEach(b => {
-      let tilvalg = "uden";
+      let tilvalg = "";
       if (b.chili && b.dressing) {
         tilvalg = "med chili og dressing";
       } else if (b.chili) {
