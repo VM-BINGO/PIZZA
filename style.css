@@ -174,4 +174,13 @@ body {
 .pizza-knap,
 .gruppe-header {
   color: #000;
+}.tilvalg {
+  position: relative;
+  z-index: 10;
+}
+
+.tilvalg-knap {
+  pointer-events: auto;
+  position: relative;
+  z-index: 20;
 }
