@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <title>Pizza app</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Pizza app</h1>
+
+
+
+<div id="pizzaListe" class="pizza-liste"></div>
+<div class="tilvalg">
+
+<div id="valgtPizza" class="valgt-pizza">
+  Ingen pizza valgt
+</div>
+
+  <button id="chiliBtn" class="tilvalg-knap" disabled>🌶️ Chili</button>
+  <button id="dressingBtn" class="tilvalg-knap" disabled>🥗 Dressing</button>
+</div>
+
+<div class="kommentar">
+  <input id="kommentarInput" type="text" placeholder="Kommentar (fx: uden løg)">
+</div>
+
+<div class="bestiller">
+  <input id="navnInput" type="text" placeholder="Bestillers navn">
+</div>
+
+
+<button id="tilføjBtn" class="primær">➕ Tilføj bestilling</button>
+
+
+
+<h2>Bestillinger</h2>
+<div id="bestillinger"></div>
+
+<h2>Pizzaria – samlet bestilling</h2>
+<div id="samletListe"></div>
+
+<button id="nulstilBtn" class="danger">🗑 Nulstil</button>
+
+<script src="app.js"></script>
+</body>
+</html>
