@@ -173,52 +173,56 @@ kommentarInput.value = "";
 
 
 // ===== VIS BESTILLINGER =====
-
 function visBestillinger() {
   bestillingerDiv.innerHTML = "";
 
-  [...bestillinger]
-    .sort((a, b) => a.navn.localeCompare(b.navn, "da", { sensitivity: "base" }))
-    .forEach((b, index) => {
+  // SORTÉR ALTID ved visning (dansk alfabet)
+  const sorterede = [...bestillinger].sort((a, b) =>
+    a.navn.localeCompare(b.navn, "da", { sensitivity: "base" })
+  );
 
-      const div = document.createElement("div");
-      div.className = "bestilling";
+  sorterede.forEach((b, index) => {
+    const div = document.createElement("div");
+    div.className = "bestilling";
 
-      let tekst = `${b.navn}: ${b.pizza.nr} ${b.pizza.navn}`;
+    let tekst = `${b.navn}: ${b.pizza.nr} ${b.pizza.navn}`;
 
-      // saml tilvalg dynamisk
-      const tilvalg = [];
-      if (b.chili) tilvalg.push("chili");
-      if (b.dressing) tilvalg.push("dressing");
-      if (b.hvidlog) tilvalg.push("hvidløg");
+    const tilvalg = [];
+    if (b.chili) tilvalg.push("chili");
+    if (b.dressing) tilvalg.push("dressing");
+    if (b.hvidlog) tilvalg.push("hvidløg");
 
-      if (tilvalg.length > 0) {
-        tekst += " + " + tilvalg.join(" og ");
-      }
+    if (tilvalg.length > 0) {
+      tekst += " + " + tilvalg.join(" og ");
+    }
 
-      if (b.kommentar) {
-        tekst += ` (${b.kommentar})`;
-      }
+    if (b.kommentar) {
+      tekst += ` (${b.kommentar})`;
+    }
 
-      const tekstSpan = document.createElement("span");
-      tekstSpan.textContent = tekst;
+    const tekstSpan = document.createElement("span");
+    tekstSpan.textContent = tekst;
 
-      const sletBtn = document.createElement("button");
-      sletBtn.textContent = "✖";
-      sletBtn.className = "slet-knap";
+    const sletBtn = document.createElement("button");
+    sletBtn.textContent = "✖";
+    sletBtn.className = "slet-knap";
 
-      sletBtn.onclick = () => {
-        if (!confirm("Slet denne bestilling?")) return;
-        bestillinger.splice(index, 1);
-        gemBestillinger();
-        visBestillinger();
-        visSamletListe();
-      };
+    // find korrekt index i ORIGINAL array
+    sletBtn.onclick = () => {
+      if (!confirm("Slet denne bestilling?")) return;
 
-      div.appendChild(tekstSpan);
-      div.appendChild(sletBtn);
-      bestillingerDiv.appendChild(div);
-    });
+      const realIndex = bestillinger.indexOf(b);
+      bestillinger.splice(realIndex, 1);
+
+      gemBestillinger();
+      visBestillinger();
+      visSamletListe();
+    };
+
+    div.appendChild(tekstSpan);
+    div.appendChild(sletBtn);
+    bestillingerDiv.appendChild(div);
+  });
 }
 
 
