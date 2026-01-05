@@ -142,11 +142,14 @@ h1, h2 {
 }
 
 /* større skærmene */
-@media (min-width: 600px) {
+@media (min-width: 900px) {
   .pizza-grid {
     grid-template-columns: repeat(3, 1fr);
+    grid-auto-flow: column;
   }
 }
+
+
 .kommentar input {
   width: 100%;
   padding: 12px;
