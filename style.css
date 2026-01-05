@@ -142,7 +142,7 @@ h1, h2 {
 
 
 
-/* større skærme */
+/* større skærmene */
 @media (min-width: 600px) {
   .pizza-grid {
     grid-template-columns: repeat(3, 1fr);
