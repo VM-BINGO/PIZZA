@@ -2,6 +2,7 @@
 let valgtPizza = null;
 let chili = false;
 let dressing = false;
+let hvidlog = false;
 let bestillinger = [];
 const gemte = localStorage.getItem("pizzaBestillinger");
 if (gemte) {
@@ -14,6 +15,7 @@ const valgtDiv = document.getElementById("valgtPizza");
 const pizzaListe = document.getElementById("pizzaListe");
 const chiliBtn = document.getElementById("chiliBtn");
 const dressingBtn = document.getElementById("dressingBtn");
+const hvidlogBtn = document.getElementById("hvidlogBtn");
 const navnInput = document.getElementById("navnInput");
 const bestillingerDiv = document.getElementById("bestillinger");
 const samletListeDiv = document.getElementById("samletListe");
@@ -23,6 +25,8 @@ const kommentarInput = document.getElementById("kommentarInput");
 // slå tilvalg fra ved start
 chiliBtn.disabled = true;
 dressingBtn.disabled = true;
+hvidlogBtn.disabled = true;
+
 
 // ===== HENT PIZZAER =====
 fetch("pizzaer.json")
@@ -49,8 +53,8 @@ fetch("pizzaer.json")
     // opret hver gruppe lodret
     Object.entries(grupper).forEach(([gruppeNavn, gruppePizzaer]) => {
 
-       // 🔽 SORTERING (DEN MANGLEDE DEL)
-  gruppePizzaer.sort((a, b) => a.nr - b.nr);
+      // 🔽 sortering
+      gruppePizzaer.sort((a, b) => a.nr - b.nr);
 
       const gruppeDiv = document.createElement("div");
       gruppeDiv.className = "pizza-gruppe";
@@ -71,17 +75,24 @@ fetch("pizzaer.json")
         btn.onclick = () => {
           valgtPizza = pizza;
 
+          // markering
           document.querySelectorAll(".pizza-knap")
             .forEach(b => b.classList.remove("valgt"));
           btn.classList.add("valgt");
 
+          // nulstil tilvalg
           chili = false;
           dressing = false;
+          hvidlog = false;
+
           chiliBtn.classList.remove("valgt");
           dressingBtn.classList.remove("valgt");
+          hvidlogBtn.classList.remove("valgt");
 
+          // aktiver tilvalg
           chiliBtn.disabled = false;
           dressingBtn.disabled = false;
+          hvidlogBtn.disabled = false;
 
           valgtDiv.textContent =
             `Valgt: ${pizza.nr} – ${pizza.navn} (${pizza.pris} kr)`;
@@ -114,6 +125,11 @@ dressingBtn.onclick = () => {
   dressingBtn.classList.toggle("valgt", dressing);
 };
 
+hvidlogBtn.onclick = () => {
+  if (!valgtPizza) return;
+  hvidlog = !hvidlog;
+  hvidlogBtn.classList.toggle("valgt", hvidlog);
+};
 
 // ===== TILFØJ BESTILLING =====
 
@@ -133,10 +149,19 @@ document.getElementById("tilføjBtn").onclick = () => {
   pizza: valgtPizza,
   chili,
   dressing,
+  hvidlog,
   kommentar: kommentarInput.value.trim()
 });
 
 gemBestillinger();
+
+chili = false;
+dressing = false;
+hvidlog = false;
+
+chiliBtn.classList.remove("valgt");
+dressingBtn.classList.remove("valgt");
+hvidlogBtn.classList.remove("valgt");
 
 kommentarInput.value = "";
 
@@ -149,54 +174,52 @@ kommentarInput.value = "";
 
 // ===== VIS BESTILLINGER =====
 
-
 function visBestillinger() {
   bestillingerDiv.innerHTML = "";
 
-  bestillinger.forEach((b, index) => {
-    const div = document.createElement("div");
-    div.className = "bestilling";
+  [...bestillinger]
+    .sort((a, b) => a.navn.localeCompare(b.navn, "da", { sensitivity: "base" }))
+    .forEach((b, index) => {
 
-    let tekst = `${b.navn}: ${b.pizza.nr} ${b.pizza.navn}`;
+      const div = document.createElement("div");
+      div.className = "bestilling";
 
-    if (b.chili && b.dressing) {
-      tekst += " + chili og dressing";
-    } else if (b.chili) {
-      tekst += " + chili";
-    } else if (b.dressing) {
-      tekst += " + dressing";
-    } else {
-      tekst += "";
-    }
+      let tekst = `${b.navn}: ${b.pizza.nr} ${b.pizza.navn}`;
 
-    if (b.kommentar) {
-      tekst += ` (${b.kommentar})`;
-    }
+      // saml tilvalg dynamisk
+      const tilvalg = [];
+      if (b.chili) tilvalg.push("chili");
+      if (b.dressing) tilvalg.push("dressing");
+      if (b.hvidlog) tilvalg.push("hvidløg");
 
-    // tekst
-    const tekstSpan = document.createElement("span");
-    tekstSpan.textContent = tekst;
+      if (tilvalg.length > 0) {
+        tekst += " + " + tilvalg.join(" og ");
+      }
 
-    // slet-knap
-    const sletBtn = document.createElement("button");
-    sletBtn.textContent = "✖";
-    sletBtn.className = "slet-knap";
+      if (b.kommentar) {
+        tekst += ` (${b.kommentar})`;
+      }
 
-    sletBtn.onclick = () => {
-      if (!confirm("Slet denne bestilling?")) return;
+      const tekstSpan = document.createElement("span");
+      tekstSpan.textContent = tekst;
 
-      bestillinger.splice(index, 1);
-      gemBestillinger();
-      visBestillinger();
-      visSamletListe();
-    };
+      const sletBtn = document.createElement("button");
+      sletBtn.textContent = "✖";
+      sletBtn.className = "slet-knap";
 
-    div.appendChild(tekstSpan);
-    div.appendChild(sletBtn);
-    bestillingerDiv.appendChild(div);
-  });
+      sletBtn.onclick = () => {
+        if (!confirm("Slet denne bestilling?")) return;
+        bestillinger.splice(index, 1);
+        gemBestillinger();
+        visBestillinger();
+        visSamletListe();
+      };
+
+      div.appendChild(tekstSpan);
+      div.appendChild(sletBtn);
+      bestillingerDiv.appendChild(div);
+    });
 }
-
 
 
 // ===== Vis Samlet Liste =====
@@ -214,11 +237,8 @@ function visSamletListe() {
         navn: b.pizza.navn,
         total: 0,
 
-        // samlede uden kommentar
-        uden: 0,
-        chili: 0,
-        dressing: 0,
-        chiliDressing: 0,
+        // tællere for kombinationer UDEN kommentar
+        counts: {},
 
         // individuelle med kommentar
         special: []
@@ -227,63 +247,56 @@ function visSamletListe() {
 
     samlet[nr].total++;
 
+    // byg tilvalg-nøgle (samme logik overalt)
+    const tilvalg = [];
+    if (b.chili) tilvalg.push("chili");
+    if (b.dressing) tilvalg.push("dressing");
+    if (b.hvidlog) tilvalg.push("hvidløg");
+
+    const key = tilvalg.length ? tilvalg.join(" + ") : "uden";
+
+    // hvis kommentar → egen linje
     if (b.kommentar) {
-      // altid egen linje
-      samlet[nr].special.push(b);
+      samlet[nr].special.push({ ...b, key });
       return;
     }
 
-    if (b.chili && b.dressing) {
-      samlet[nr].chiliDressing++;
-    } else if (b.chili) {
-      samlet[nr].chili++;
-    } else if (b.dressing) {
-      samlet[nr].dressing++;
-    } else {
-      samlet[nr].uden++;
+    // ellers samles
+    if (!samlet[nr].counts[key]) {
+      samlet[nr].counts[key] = 0;
     }
+    samlet[nr].counts[key]++;
   });
 
-  Object.entries(samlet).forEach(([nr, data]) => {
+  // visning
+  Object.values(samlet).forEach(data => {
     const div = document.createElement("div");
     div.className = "bestilling";
 
-    let html = `
-      <strong>${data.total} stk ${data.navn}</strong><br>
-    `;
+    let html = `<strong>${data.total} stk ${data.navn}</strong><br>`;
 
-    if (data.chiliDressing > 0) {
-      html += `• ${data.chiliDressing} stk ${data.navn} med chili og dressing<br>`;
-    }
-    if (data.chili > 0) {
-      html += `• ${data.chili} stk ${data.navn} med chili<br>`;
-    }
-    if (data.dressing > 0) {
-      html += `• ${data.dressing} stk ${data.navn} med dressing<br>`;
-    }
-    if (data.uden > 0) {
-      html += `• ${data.uden} stk ${data.navn} <br>`;
-    }
+    // samlede linjer (uden kommentar)
+    Object.entries(data.counts).forEach(([key, antal]) => {
+      if (key === "uden") {
+        html += `• ${antal} stk ${data.navn}<br>`;
+      } else {
+        html += `• ${antal} stk ${data.navn} med ${key.replaceAll(" + ", " og ")}<br>`;
+      }
+    });
 
     // individuelle med kommentar
     data.special.forEach(b => {
-      let tilvalg = "";
-      if (b.chili && b.dressing) {
-        tilvalg = "med chili og dressing";
-      } else if (b.chili) {
-        tilvalg = "med chili";
-      } else if (b.dressing) {
-        tilvalg = "med dressing";
+      if (b.key === "uden") {
+        html += `• 1 stk ${data.navn} : OBS (${b.kommentar})<br>`;
+      } else {
+        html += `• 1 stk ${data.navn} med ${b.key.replaceAll(" + ", " og ")} : OBS (${b.kommentar})<br>`;
       }
-
-      html += `• 1 stk ${data.navn} ${tilvalg} : OBS (${b.kommentar})<br>`;
     });
 
     div.innerHTML = html;
     samletListeDiv.appendChild(div);
   });
 }
-
 
 
 // ===== NULSTIL =====

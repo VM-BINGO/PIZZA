@@ -2,6 +2,9 @@
 <html lang="da">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="format-detection" content="telephone=no,email=no,address=no">
+
   <title>Pizza app</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -12,15 +15,16 @@
 
 
 <div id="pizzaListe" class="pizza-liste"></div>
-<div class="tilvalg">
+
 
 <div id="valgtPizza" class="valgt-pizza">
   Ingen pizza valgt
+<div class="tilvalg">
+  <button id="chiliBtn" class="tilvalg-knap">🌶️ Chili</button>
+  <button id="dressingBtn" class="tilvalg-knap">🥗 Dressing</button>
+  <button id="hvidlogBtn" class="tilvalg-knap">🧄 Hvidløg</button>
 </div>
 
-  <button id="chiliBtn" class="tilvalg-knap" disabled>🌶️ Chili</button>
-  <button id="dressingBtn" class="tilvalg-knap" disabled>🥗 Dressing</button>
-</div>
 
 <div class="kommentar">
   <input id="kommentarInput" type="text" placeholder="Kommentar (fx: uden løg)">

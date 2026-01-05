@@ -141,9 +141,6 @@ h1, h2 {
   gap: 8px;
 }
 
-
-
-
 /* større skærmene */
 @media (min-width: 600px) {
   .pizza-grid {
@@ -167,4 +164,14 @@ h1, h2 {
 
 .slet-knap:hover {
   color: #e74c3c;
+}
+body {
+  color: #000;
+}
+
+.bestilling,
+.valgt-pizza,
+.pizza-knap,
+.gruppe-header {
+  color: #000;
 }
