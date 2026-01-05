@@ -1,16 +1,16 @@
 @echo off
-echo ===============================
-echo 🚀 GitHub push starter...
-echo ===============================
+echo ============================
+echo Initialiserer Git repo
+echo ============================
 
-git status
-
+git init
+git branch -M main
 git add .
+git commit -m "Initial commit - pizza app"
 
-git commit -m "Update pizza app"
-
-git push
+git remote add origin https://github.com/DIT_GITHUB_NAVN/pizza-app.git
+git push -u origin main
 
 echo.
-echo ✅ Push faerdig!
+echo ✅ Repo initialiseret og pushed!
 pause

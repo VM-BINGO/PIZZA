@@ -132,7 +132,7 @@ h1, h2 {
   margin-bottom: 8px;
 }
 
-/* grid KUN for pizzaer i gruppen */
+/* grid fvdefrverver KUN for pizzaer i gruppen */
 .pizza-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
