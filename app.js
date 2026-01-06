@@ -65,41 +65,61 @@ fetch("pizzaer.json")
       gruppeDiv.appendChild(header);
 
       const grid = document.createElement("div");
-      grid.className = "pizza-grid";
+grid.className = "pizza-grid";
 
-      gruppePizzaer.forEach(pizza => {
-        const btn = document.createElement("button");
-        btn.className = "pizza-knap";
-        btn.textContent = `${pizza.nr} – ${pizza.navn}`;
+// lav 3 kolonner
+const cols = [
+  document.createElement("div"),
+  document.createElement("div"),
+  document.createElement("div")
+];
+cols.forEach(col => col.className = "pizza-col");
 
-        btn.onclick = () => {
-          valgtPizza = pizza;
+// beregn hvor mange pr kolonne (lodret fyld)
+const rows = Math.ceil(gruppePizzaer.length / 3);
 
-          // markering
-          document.querySelectorAll(".pizza-knap")
-            .forEach(b => b.classList.remove("valgt"));
-          btn.classList.add("valgt");
+gruppePizzaer.forEach((pizza, index) => {
+  const colIndex = Math.floor(index / rows);
 
-          // nulstil tilvalg
-          chili = false;
-          dressing = false;
-          hvidlog = false;
+  const btn = document.createElement("button");
+  btn.className = "pizza-knap";
+  btn.textContent = `${pizza.nr} – ${pizza.navn}`;
 
-          chiliBtn.classList.remove("valgt");
-          dressingBtn.classList.remove("valgt");
-          hvidlogBtn.classList.remove("valgt");
+  btn.onclick = () => {
+    valgtPizza = pizza;
 
-          // aktiver tilvalg
-          chiliBtn.disabled = false;
-          dressingBtn.disabled = false;
-          hvidlogBtn.disabled = false;
+    document.querySelectorAll(".pizza-knap")
+      .forEach(b => b.classList.remove("valgt"));
+    btn.classList.add("valgt");
 
-          valgtDiv.textContent =
-            `Valgt: ${pizza.nr} – ${pizza.navn} (${pizza.pris} kr)`;
-        };
+    // nulstil tilvalg
+    chili = false;
+    dressing = false;
+    hvidlog = false;
 
-        grid.appendChild(btn);
-      });
+    chiliBtn.classList.remove("valgt");
+    dressingBtn.classList.remove("valgt");
+    hvidlogBtn.classList.remove("valgt");
+
+    // aktiver tilvalg
+    chiliBtn.disabled = false;
+    dressingBtn.disabled = false;
+    hvidlogBtn.disabled = false;
+
+    valgtDiv.textContent =
+      `Valgt: ${pizza.nr} – ${pizza.navn} (${pizza.pris} kr)`;
+  };
+
+  cols[colIndex].appendChild(btn);
+});
+
+// saml kolonnerne i grid
+cols.forEach(col => {
+  if (col.children.length > 0) {
+    grid.appendChild(col);
+  }
+});
+
 
       gruppeDiv.appendChild(grid);
       pizzaListe.appendChild(gruppeDiv);
