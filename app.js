@@ -36,7 +36,7 @@ fetch("pizzaer.json")
     // ryd listen
     pizzaListe.innerHTML = "";
 
-    // grupper: 1–9, 10–19, 20–29 ...
+    // grupper: 1–10, 11–20, 21–30 ...
     const grupper = {};
 
     pizzaer.forEach(pizza => {
