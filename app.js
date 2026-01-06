@@ -36,13 +36,15 @@ fetch("pizzaer.json")
     // ryd listen
     pizzaListe.innerHTML = "";
 
-    // grupper: 1–10, 11–20, 21–30 ...
+    // grupper: 1–9, 10–19, 20–29 ...
     const grupper = {};
 
     pizzaer.forEach(pizza => {
-      const start = Math.floor((pizza.nr - 1) / 10) * 10 + 1;
-      const slut = start + 8;
-      const key = `${start}-${slut}`;
+      const start = Math.floor(pizza.nr / 10) * 10;
+      const groupStart = start === 0 ? 1 : start;
+      const groupEnd = groupStart === 1 ? 9 : groupStart + 9;
+      const key = `${groupStart}-${groupEnd}`;
+
 
       if (!grupper[key]) {
         grupper[key] = [];
