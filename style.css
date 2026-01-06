@@ -132,24 +132,18 @@ h1, h2 {
   margin-bottom: 8px;
 }
 /* grid KUN for pizzaer i gruppen */
+/* pizzaer i gruppen */
 .pizza-grid {
   display: flex;
   gap: 8px;
 }
 
+/* hver kolonne */
 .pizza-col {
   display: flex;
   flex-direction: column;
   gap: 8px;
   flex: 1;
-}
-
-
-/* web / større skærme */
-@media (min-width: 900px) {
-  .pizza-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 
