@@ -11,8 +11,8 @@ if (gemte) {
 
 
 // ===== DOM =====
-const valgtDiv = document.getElementById("valgtPizza");
-const pizzaListe = document.getElementById("pizzaListe");
+//const valgtDiv = document.getElementById("valgtPizza");
+const pizzaListe = document.getElementById("pizzaGrupper");
 const chiliBtn = document.getElementById("chiliBtn");
 const dressingBtn = document.getElementById("dressingBtn");
 const hvidlogBtn = document.getElementById("hvidlogBtn");
@@ -20,6 +20,15 @@ const navnInput = document.getElementById("navnInput");
 const bestillingerDiv = document.getElementById("bestillinger");
 const samletListeDiv = document.getElementById("samletListe");
 const kommentarInput = document.getElementById("kommentarInput");
+const TILVALG_PRISER = {
+  chili: 0,
+  dressing: 0,
+  hvidlog: 0
+};
+
+chiliBtn.textContent = `🌶️ Chili (+${TILVALG_PRISER.chili} kr)`;
+dressingBtn.textContent = `🥫 Dressing (+${TILVALG_PRISER.dressing} kr)`;
+hvidlogBtn.textContent = `🧄 Hvidløg (+${TILVALG_PRISER.hvidlog} kr)`;
 
 
 // slå tilvalg fra ved start
@@ -84,13 +93,25 @@ gruppePizzaer.forEach((pizza, index) => {
   const colIndex = Math.floor(index / rows);
 
   const btn = document.createElement("button");
-  btn.className = "pizza-knap";
-  btn.textContent = `${pizza.nr} – ${pizza.navn}`;
+   btn.className = "pizza-btn";
+  btn.innerHTML = `
+  <div class="pizza-title">${pizza.nr} – ${pizza.navn}</div>
+  <div class="pizza-price">${pizza.pris} kr</div>
+  <span class="pizza-info-icon">i</span>
+`;
+
+const infoIcon = btn.querySelector(".pizza-info-icon");
+infoIcon.addEventListener("click", e => {
+  e.stopPropagation();
+  åbnInfoPopup(pizza);
+});
+
+
 
   btn.onclick = () => {
     valgtPizza = pizza;
 
-    document.querySelectorAll(".pizza-knap")
+    document.querySelectorAll(".pizza-btn")
       .forEach(b => b.classList.remove("valgt"));
     btn.classList.add("valgt");
 
@@ -108,9 +129,7 @@ gruppePizzaer.forEach((pizza, index) => {
     dressingBtn.disabled = false;
     hvidlogBtn.disabled = false;
 
-    valgtDiv.textContent =
-      `Valgt: ${pizza.nr} – ${pizza.navn} (${pizza.pris} kr)`;
-  };
+    };
 
   cols[colIndex].appendChild(btn);
 });
@@ -131,6 +150,18 @@ cols.forEach(col => {
     console.error("Fejl ved indlæsning af pizzaer:", err);
   });
 
+
+// ===== Beregn priser =====
+
+function beregnPris(pizza, tilvalg) {
+  let total = pizza.pris;
+
+  if (tilvalg.chili) total += TILVALG_PRISER.chili;
+  if (tilvalg.dressing) total += TILVALG_PRISER.dressing;
+  if (tilvalg.hvidlog) total += TILVALG_PRISER.hvidlog;
+
+  return total;
+}
 
 // ===== TILVALG =====
 
@@ -165,6 +196,11 @@ document.getElementById("tilføjBtn").onclick = () => {
     alert("Indtast navn");
     return;
   }
+const totalPris = beregnPris(valgtPizza, {
+  chili,
+  dressing,
+  hvidlog
+});
 
   bestillinger.push({
   navn: navnInput.value.trim(),
@@ -172,10 +208,14 @@ document.getElementById("tilføjBtn").onclick = () => {
   chili,
   dressing,
   hvidlog,
-  kommentar: kommentarInput.value.trim()
+  kommentar: kommentarInput.value.trim(),
+  pris: totalPris   // 👈 NY
 });
 
+
 gemBestillinger();
+visTakPopup(totalPris);
+
 
 chili = false;
 dressing = false;
@@ -190,6 +230,7 @@ kommentarInput.value = "";
   navnInput.value = "";
   visBestillinger();
   visSamletListe();
+  opdaterTotalAntal();
   
 };
 
@@ -203,10 +244,21 @@ function visBestillinger() {
     a.navn.localeCompare(b.navn, "da", { sensitivity: "base" })
   );
 
-  sorterede.forEach((b, index) => {
+  sorterede.forEach(b => {
     const div = document.createElement("div");
     div.className = "bestilling";
 
+    // ===== PRIS (fallback for gamle data)
+    const pris =
+      typeof b.pris === "number"
+        ? b.pris
+        : beregnPris(b.pizza, {
+            chili: b.chili,
+            dressing: b.dressing,
+            hvidlog: b.hvidlog
+          });
+
+    // ===== TEKST TIL SKÆRM (uændret)
     let tekst = `${b.navn}: ${b.pizza.nr} ${b.pizza.navn}`;
 
     const tilvalg = [];
@@ -218,6 +270,8 @@ function visBestillinger() {
       tekst += " + " + tilvalg.join(" og ");
     }
 
+    tekst += ` (${pris} kr.)`;
+
     if (b.kommentar) {
       tekst += ` (${b.kommentar})`;
     }
@@ -225,11 +279,36 @@ function visBestillinger() {
     const tekstSpan = document.createElement("span");
     tekstSpan.textContent = tekst;
 
+    // ===== EKSTRA MARKUP TIL PRINT (skjult på skærm)
+    const printNavn = document.createElement("span");
+    printNavn.className = "print-navn";
+    printNavn.textContent = b.navn.toUpperCase();
+
+    const printBestilling = document.createElement("span");
+    printBestilling.className = "print-bestilling";
+
+    let bestilTekst = `${b.pizza.nr} ${b.pizza.navn}`;
+    if (b.chili) bestilTekst += " + Chili";
+    if (b.dressing) bestilTekst += " + Dressing";
+    if (b.hvidlog) bestilTekst += " + Hvidløg";
+    bestilTekst += ` (${pris} kr.)`;
+
+    printBestilling.textContent = bestilTekst;
+
+    // container til print (bruges kun af print-CSS)
+    const printContainer = document.createElement("span");
+    printContainer.className = "print-row";
+    printContainer.appendChild(printNavn);
+    printContainer.appendChild(printBestilling);
+
+    div.appendChild(tekstSpan);
+    div.appendChild(printContainer);
+
+    // ===== SLET-KNAP
     const sletBtn = document.createElement("button");
     sletBtn.textContent = "✖";
     sletBtn.className = "slet-knap";
 
-    // find korrekt index i ORIGINAL array
     sletBtn.onclick = () => {
       if (!confirm("Slet denne bestilling?")) return;
 
@@ -239,16 +318,42 @@ function visBestillinger() {
       gemBestillinger();
       visBestillinger();
       visSamletListe();
+      opdaterTotalAntal();
     };
 
-    div.appendChild(tekstSpan);
     div.appendChild(sletBtn);
     bestillingerDiv.appendChild(div);
   });
 }
 
-
 // ===== Vis Samlet Liste =====
+
+function opdaterTotalAntal() {
+  const totalDiv = document.getElementById("totalAntal");
+  if (!totalDiv) return;
+
+  let totalPizzaer = 0;
+  let totalPris = 0;
+
+  bestillinger.forEach(b => {
+    totalPizzaer += 1;
+
+    const pris =
+      typeof b.pris === "number"
+        ? b.pris
+        : beregnPris(b.pizza, {
+            chili: b.chili,
+            dressing: b.dressing,
+            hvidlog: b.hvidlog
+          });
+
+    totalPris += pris;
+  });
+
+  totalDiv.textContent = `${totalPizzaer} pizzaer i alt – ${totalPris} kr`;
+}
+
+
 
 function visSamletListe() {
   samletListeDiv.innerHTML = "";
@@ -262,18 +367,13 @@ function visSamletListe() {
       samlet[nr] = {
         navn: b.pizza.navn,
         total: 0,
-
-        // tællere for kombinationer UDEN kommentar
         counts: {},
-
-        // individuelle med kommentar
         special: []
       };
     }
 
     samlet[nr].total++;
 
-    // byg tilvalg-nøgle (samme logik overalt)
     const tilvalg = [];
     if (b.chili) tilvalg.push("chili");
     if (b.dressing) tilvalg.push("dressing");
@@ -281,47 +381,73 @@ function visSamletListe() {
 
     const key = tilvalg.length ? tilvalg.join(" + ") : "uden";
 
-    // hvis kommentar → egen linje
     if (b.kommentar) {
-      samlet[nr].special.push({ ...b, key });
+      samlet[nr].special.push({ key, kommentar: b.kommentar });
       return;
     }
 
-    // ellers samles
     if (!samlet[nr].counts[key]) {
       samlet[nr].counts[key] = 0;
     }
     samlet[nr].counts[key]++;
   });
 
-  // visning
   Object.values(samlet).forEach(data => {
     const div = document.createElement("div");
     div.className = "bestilling";
 
-    let html = `<strong>${data.total} stk ${data.navn}</strong><br>`;
+    const title = document.createElement("div");
+    title.className = "bestilling-title";
+    title.innerHTML = `
+  <span class="antal-linje">
+    ${data.total} x ${data.navn}
+  </span>
+`;
 
-    // samlede linjer (uden kommentar)
+
+    const ul = document.createElement("ul");
+    ul.className = "bestilling-detaljer";
+
     Object.entries(data.counts).forEach(([key, antal]) => {
-      if (key === "uden") {
-        html += `• ${antal} stk ${data.navn}<br>`;
-      } else {
-        html += `• ${antal} stk ${data.navn} med ${key.replaceAll(" + ", " og ")}<br>`;
-      }
+      const li = document.createElement("li");
+      li.textContent =
+        key === "uden"
+          ? `${antal} stk ${data.navn}`
+          : `${antal} stk ${data.navn} med ${key.replaceAll(" + ", " og ")}`;
+      ul.appendChild(li);
     });
 
-    // individuelle med kommentar
-    data.special.forEach(b => {
-      if (b.key === "uden") {
-        html += `• 1 stk ${data.navn} : OBS (${b.kommentar})<br>`;
-      } else {
-        html += `• 1 stk ${data.navn} med ${b.key.replaceAll(" + ", " og ")} : OBS (${b.kommentar})<br>`;
-      }
+    data.special.forEach(s => {
+      const li = document.createElement("li");
+      li.textContent =
+        s.key === "uden"
+          ? `1 stk ${data.navn} – OBS (${s.kommentar})`
+          : `1 stk ${data.navn} med ${s.key.replaceAll(" + ", " og ")} – OBS (${s.kommentar})`;
+      ul.appendChild(li);
     });
 
-    div.innerHTML = html;
+    div.appendChild(title);
+    div.appendChild(ul);
     samletListeDiv.appendChild(div);
   });
+}
+
+
+// =========================
+// INFO POPUP
+// =========================
+function åbnInfoPopup(pizza) {
+  document.getElementById("modalTitle").textContent =
+    `${pizza.nr} – ${pizza.navn}`;
+
+  document.getElementById("modalText").textContent =
+    pizza.beskrivelse || "Ingen beskrivelse";
+
+  document.getElementById("infoModal").classList.remove("hidden");
+}
+
+function lukInfoPopup() {
+  document.getElementById("infoModal").classList.add("hidden");
 }
 
 
@@ -334,6 +460,7 @@ document.getElementById("nulstilBtn").onclick = () => {
 
   visBestillinger();
   visSamletListe();
+  opdaterTotalAntal();
 };
 
 
@@ -342,3 +469,244 @@ document.getElementById("nulstilBtn").onclick = () => {
 function gemBestillinger() {
   localStorage.setItem("pizzaBestillinger", JSON.stringify(bestillinger));
 }
+
+// ===== opdater listevisning ved reload =====
+document.addEventListener("DOMContentLoaded", () => {
+  visBestillinger();
+  visSamletListe();
+  opdaterTotalAntal();
+});
+
+
+// =========================
+// POPUP EVENTS (DOM READY)
+// =========================
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("modalClose")
+    .addEventListener("click", lukInfoPopup);
+
+  document
+    .querySelector("#infoModal .modal-backdrop")
+    .addEventListener("click", lukInfoPopup);
+});
+
+function visTakPopup(beløb) {
+  const mpBox = document.querySelector(".mobilepay-box");
+
+  const mpNavn = mpBox?.dataset.mobilepayName || "";
+  const mpNummer = mpBox?.dataset.mobilepayBox || "";
+
+  document.getElementById("modalTitle").textContent =
+    "Tak for din bestilling";
+
+  document.getElementById("modalText").textContent =
+  `Husk at overføre ${beløb},- kr. med MobilePay til\n(BOX ${mpNummer}) ${mpNavn} `;
+
+
+  document.getElementById("infoModal").classList.remove("hidden");
+}
+
+
+// =========================
+// PRINT + MAIL (Formspree)
+// =========================
+document.getElementById("klarBtn").onclick = () => {
+  if (bestillinger.length === 0) {
+    alert("Der er ingen bestillinger at printe.");
+    return;
+  }
+
+  const ok = confirm(
+    "Er du helt sikker på, at du vil printe og afslutte ordren?\n\n" +
+    "Når du fortsætter, bør ordren ikke ændres."
+  );
+
+  if (!ok) {
+    return; // brugeren fortrød
+  }
+
+  // ===== BEREGN TOTALER
+  let totalPizzaer = 0;
+  let totalPris = 0;
+
+  bestillinger.forEach(b => {
+    totalPizzaer += 1;
+
+    const pris =
+      typeof b.pris === "number"
+        ? b.pris
+        : beregnPris(b.pizza, {
+            chili: b.chili,
+            dressing: b.dressing,
+            hvidlog: b.hvidlog
+          });
+
+    totalPris += pris;
+  });
+
+  // ===== SEND MAIL (KUN EFTER OK)
+  fetch("https://formspree.io/f/xnjneddp", {
+    method: "POST",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message:
+        `Pizzaordre afsluttet\n` +
+        `Antal pizzaer: ${totalPizzaer}\n` +
+        `Samlet beløb: ${totalPris} kr.`,
+      tidspunkt: new Date().toLocaleString("da-DK")
+    })
+  });
+
+  // ===== PRINT (din eksisterende print-kode fortsætter her)
+  const printWindow = window.open("", "", "width=900,height=700");
+
+  const pizzariaHTML = samletListeDiv.innerHTML;
+  const internHTML = bestillingerDiv.innerHTML;
+
+  // 👇 her indsætter du dit printWindow.document.write(...)
+
+  // ===== PRINT
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Pizzabestilling</title>
+
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 10mm;
+            color: #000;
+          }
+
+          h2 {
+            margin: 0 0 10px 0;
+            border-bottom: 2px solid #000;
+            padding-bottom: 6px;
+          }
+
+          .print-section {
+            display: block;
+          }
+
+          .page-after {
+            page-break-after: always;
+          }
+
+          .slet-knap {
+            display: none;
+          }
+
+          .bestilling {
+            margin-bottom: 14px;
+          }
+
+          .bestilling > span:first-child {
+            display: none;
+          }
+
+          .print-row {
+            display: grid;
+            grid-template-columns: 12ch 1fr;
+            column-gap: 14px;
+            font-size: 12pt;
+            line-height: 1.4;
+          }
+
+          .print-navn {
+            font-weight: 700;
+            white-space: nowrap;
+          }
+
+          .print-bestilling {
+            white-space: nowrap;
+          }
+        </style>
+      </head>
+
+      <body>
+
+        <div class="print-section page-after">
+          <h2>
+            🍕 Bestillingsliste (pizzaria)
+            <span class="total-antal">
+              – ${totalPizzaer} pizzaer i alt – ${totalPris} kr.
+            </span>
+          </h2>
+          ${pizzariaHTML}
+        </div>
+
+        <div class="print-section">
+          <h2>👤 Intern bestillingsliste</h2>
+          ${internHTML}
+        </div>
+
+        <script>
+          window.onload = () => {
+            window.print();
+            window.close();
+          };
+        </script>
+
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+};
+
+function loadMobilePay() {
+  const mpBox = document.querySelector(".mobilepay-box");
+  if (!mpBox) return;
+
+  const gemt = JSON.parse(localStorage.getItem("mobilepayBox"));
+  if (!gemt) return;
+
+  mpBox.dataset.mobilepayName = gemt.name;
+  mpBox.dataset.mobilepayBox = gemt.box;
+  mpBox.querySelector(".mobilepay-code").textContent = gemt.box;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadMobilePay();
+
+  const editBtn = document.querySelector(".mobilepay-edit");
+  const mpBox = document.querySelector(".mobilepay-box");
+
+  if (!editBtn || !mpBox) return;
+
+  editBtn.onclick = () => {
+  const nytNavn = prompt(
+    "Navn på MobilePay boks:",
+    mpBox.dataset.mobilepayName
+  );
+  if (!nytNavn) return;
+
+  const nytNummer = prompt(
+    "MP BOX nummer:",
+    mpBox.dataset.mobilepayBox
+  );
+  if (!nytNummer) return;
+
+  // gem data
+  mpBox.dataset.mobilepayName = nytNavn;
+  mpBox.dataset.mobilepayBox = nytNummer;
+
+  // 👇 VIS NUMMERET I DEN GULE BOKS
+  mpBox.querySelector(".mobilepay-code").textContent = nytNummer;
+
+  localStorage.setItem(
+    "mobilepayBox",
+    JSON.stringify({
+      name: nytNavn,
+      box: nytNummer
+    })
+  );
+};
+
+   
+});
+
