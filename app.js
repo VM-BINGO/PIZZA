@@ -214,8 +214,6 @@ const totalPris = beregnPris(valgtPizza, {
 
 
 gemBestillinger();
-visTakPopup(totalPris);
-
 
 chili = false;
 dressing = false;
@@ -233,6 +231,21 @@ kommentarInput.value = "";
   opdaterTotalAntal();
   
 };
+navnInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+
+    const ok = confirm(
+      `Tilføj bestilling for "${navnInput.value.trim()}"?\n\n` +
+      "↵ = OK    Esc = Annuller"
+    );
+
+    if (!ok) return;
+
+    document.getElementById("tilføjBtn").click();
+  }
+});
+
 
 
 // ===== VIS BESTILLINGER =====
@@ -491,21 +504,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .addEventListener("click", lukInfoPopup);
 });
 
-function visTakPopup(beløb) {
-  const mpBox = document.querySelector(".mobilepay-box");
-
-  const mpNavn = mpBox?.dataset.mobilepayName || "";
-  const mpNummer = mpBox?.dataset.mobilepayBox || "";
-
-  document.getElementById("modalTitle").textContent =
-    "Tak for din bestilling";
-
-  document.getElementById("modalText").textContent =
-  `Husk at overføre ${beløb},- kr. med MobilePay til\n(BOX ${mpNummer}) ${mpNavn} `;
-
-
-  document.getElementById("infoModal").classList.remove("hidden");
-}
 
 
 // =========================
@@ -617,9 +615,20 @@ document.getElementById("klarBtn").onclick = () => {
           }
 
           .print-navn {
-            font-weight: 700;
+            font-weight: 300;
             white-space: nowrap;
           }
+
+          .print-navn::before {
+            content: "";
+            display: inline-block;
+  	    width: 14px;
+  	    height: 14px;
+ 	    border: 2px solid #000;
+ 	    margin-right: 6px;
+  	    vertical-align: middle;
+	  }
+
 
           .print-bestilling {
             white-space: nowrap;
@@ -667,7 +676,11 @@ function loadMobilePay() {
 
   mpBox.dataset.mobilepayName = gemt.name;
   mpBox.dataset.mobilepayBox = gemt.box;
-  mpBox.querySelector(".mobilepay-code").textContent = gemt.box;
+  mpBox.querySelector(".mobilepay-code").innerHTML = `
+  <div class="mp-box-nr">${gemt.box}</div>
+  <div class="mp-box-navn">${gemt.name}</div>
+`;
+
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -696,7 +709,12 @@ document.addEventListener("DOMContentLoaded", () => {
   mpBox.dataset.mobilepayBox = nytNummer;
 
   // 👇 VIS NUMMERET I DEN GULE BOKS
-  mpBox.querySelector(".mobilepay-code").textContent = nytNummer;
+  mpBox.querySelector(".mobilepay-code").innerHTML = `
+  <div class="mp-box-nr">${nytNummer}</div>
+  <div class="mp-box-navn">${nytNavn}</div>
+`;
+
+
 
   localStorage.setItem(
     "mobilepayBox",
@@ -709,4 +727,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
    
 });
-
