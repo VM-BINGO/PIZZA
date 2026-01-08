@@ -35,7 +35,7 @@
 
   <div class="header-title">
     <h1>🍕 Pizza Bestilling</h1>
-    <p>U2</p>
+    <p><h2>U2</h2></p>
   </div>
 
 </header>
@@ -56,8 +56,15 @@
       <button id="dressingBtn" class="tilvalg-btn">🥫 Dressing</button>
       <button id="hvidlogBtn" class="tilvalg-btn">🧄 Hvidløg</button>
     </div>
-
-    <label for="navnInput">Navn</label>
+<label for="kommentarInput">Kommentar (valgfri)</label>
+    <input
+      type="text"
+      id="kommentarInput"
+      placeholder="Fx uden løg"
+      autocomplete="off"
+    >
+    
+<label for="navnInput">Navn</label>
     <input
       type="text"
       id="navnInput"
@@ -65,13 +72,7 @@
       autocomplete="off"
     >
 
-    <label for="kommentarInput">Kommentar (valgfri)</label>
-    <input
-      type="text"
-      id="kommentarInput"
-      placeholder="Fx uden løg"
-      autocomplete="off"
-    >
+    
 
     <button id="tilføjBtn" class="btn primary">
       ➕ Tilføj bestilling
