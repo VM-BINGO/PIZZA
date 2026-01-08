@@ -478,3 +478,14 @@ input[type="text"] {
 .mobilepay-edit:hover {
   opacity: 1;
 }
+.mp-box-nr {
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.mp-box-navn {
+  font-size: 18px;
+  font-weight: 500;
+  opacity: 0.8;
+}
