@@ -1,4 +1,8 @@
 // ===== STATE =====
+let valgtKoed1 = "";
+let valgtKoed2 = "";
+let valgtKoed3 = "";
+
 let valgtPizza = null;
 let chili = false;
 let dressing = false;
@@ -9,6 +13,22 @@ if (gemte) {
   bestillinger = JSON.parse(gemte);
 }
 
+// ===== KØD VALG =====
+const KOED_TYPER = [
+  "kebab",
+  "kylling",
+  "oksekød",
+  "kødfars",
+  "bacon",
+  "skinke",
+  "pepperoni",
+  "sucuk",
+  "cocktailpølser",
+  "fisk",
+  "rejer",
+  "pulled pork",
+  "vegetar"
+];
 
 // ===== DOM =====
 //const valgtDiv = document.getElementById("valgtPizza");
@@ -35,6 +55,19 @@ hvidlogBtn.textContent = `🧄 Hvidløg (+${TILVALG_PRISER.hvidlog} kr)`;
 chiliBtn.disabled = true;
 dressingBtn.disabled = true;
 hvidlogBtn.disabled = true;
+
+// ===== KØD DROPDOWN =====
+
+const koedSelect = document.getElementById("koedSelect");
+const koedSelect2 = document.getElementById("koedSelect2");
+const koedSelect3 = document.getElementById("koedSelect3");
+
+KOED_TYPER.forEach(k => {
+  const opt = document.createElement("option");
+  opt.value = k;
+  opt.textContent = k.charAt(0).toUpperCase() + k.slice(1);
+  koedSelect.appendChild(opt);
+});
 
 
 // ===== HENT PIZZAER =====
@@ -93,20 +126,178 @@ gruppePizzaer.forEach((pizza, index) => {
   const colIndex = Math.floor(index / rows);
 
   const btn = document.createElement("button");
+btn.dataset.koedMatch = pizza.beskrivelse?.toLowerCase() || "";
    btn.className = "pizza-btn";
   btn.innerHTML = `
   <div class="pizza-title">${pizza.nr} – ${pizza.navn}</div>
   <div class="pizza-price">${pizza.pris} kr</div>
   <span class="pizza-info-icon">i</span>
 `;
+btn.dataset.pizzaNr = pizza.nr;
 
 const infoIcon = btn.querySelector(".pizza-info-icon");
 infoIcon.addEventListener("click", e => {
   e.stopPropagation();
   åbnInfoPopup(pizza);
 });
+document.getElementById("hurtigLucaBtn").addEventListener("click", () => {
+  const lucaBtn = document.querySelector(
+    '.pizza-btn[data-pizza-nr="32"]'
+  );
+  const navnInput = document.getElementById("navnInput");
+
+  if (!lucaBtn || !navnInput) return;
+
+  // 1️⃣ scroll til pizzaen og vælg den
+  lucaBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+  lucaBtn.click();
+
+  // 2️⃣ scroll TIL NAVNEFELTET og fokusér
+  setTimeout(() => {
+    navnInput.scrollIntoView({ behavior: "smooth", block: "center" });
+    navnInput.focus();s
+    navnInput.select(); // marker evt. tekst
+  }, 300);
+});
 
 
+// ===== KØD DROPDOWN HAR KØD =====
+function pizzaHarKoed(pizza, koed) {
+  if (!koed) return true;
+  return pizza.beskrivelse
+    ?.toLowerCase()
+    .includes(koed.toLowerCase());
+}
+function pizzaMatcherKoed(pizza, koedListe) {
+  const tekst = pizza.beskrivelse?.toLowerCase() || "";
+  return koedListe.every(k => tekst.includes(k));
+}
+function opdaterPizzaFilter() {
+  const aktiveKoed = [valgtKoed1, valgtKoed2, valgtKoed3].filter(Boolean);
+
+  document.querySelectorAll(".pizza-btn").forEach(btn => {
+    const txt = btn.dataset.koedMatch || "";
+    const match =
+      aktiveKoed.length === 0 ||
+      aktiveKoed.every(k => txt.includes(k));
+
+    btn.style.display = match ? "" : "none";
+  });
+}
+
+// ===== KØD DROPDOWN 1-2-3 KØD =====
+koedSelect.addEventListener("change", () => {
+  valgtKoed1 = koedSelect.value;
+  valgtKoed2 = "";
+  valgtKoed3 = "";
+
+  // nulstil trin 2
+  koedSelect2.innerHTML = `<option value="">– Intet ekstra valg –</option>`;
+  koedSelect2.disabled = !valgtKoed1;
+
+  // nulstil trin 3
+  koedSelect3.innerHTML = `<option value="">– Valgfrit –</option>`;
+  koedSelect3.disabled = true;
+
+  if (!valgtKoed1) {
+    opdaterPizzaFilter();
+    return;
+  }
+
+  // byg TRIN 2
+  const tæller = {};
+
+  document.querySelectorAll(".pizza-btn").forEach(btn => {
+    const txt = btn.dataset.koedMatch || "";
+    if (txt.includes(valgtKoed1)) {
+      KOED_TYPER.forEach(k => {
+        if (k !== valgtKoed1 && txt.includes(k)) {
+          tæller[k] = (tæller[k] || 0) + 1;
+        }
+      });
+    }
+  });
+
+  Object.entries(tæller)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([k]) => {
+      const opt = document.createElement("option");
+      opt.value = k;
+      opt.textContent = k;
+      koedSelect2.appendChild(opt);
+    });
+
+  opdaterPizzaFilter();
+});
+koedSelect2.addEventListener("change", () => {
+  valgtKoed2 = koedSelect2.value;
+  valgtKoed3 = "";
+
+  koedSelect3.innerHTML = `<option value="">– Valgfrit –</option>`;
+  koedSelect3.disabled = !valgtKoed2;
+
+  if (!valgtKoed2) {
+    opdaterPizzaFilter();
+    return;
+  }
+
+  // byg TRIN 3 (kun kød der findes sammen med 1 + 2)
+  const tæller = {};
+
+  document.querySelectorAll(".pizza-btn").forEach(btn => {
+    const txt = btn.dataset.koedMatch || "";
+    if (txt.includes(valgtKoed1) && txt.includes(valgtKoed2)) {
+      KOED_TYPER.forEach(k => {
+        if (
+          k !== valgtKoed1 &&
+          k !== valgtKoed2 &&
+          txt.includes(k)
+        ) {
+          tæller[k] = (tæller[k] || 0) + 1;
+        }
+      });
+    }
+  });
+
+  Object.entries(tæller)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([k]) => {
+      const opt = document.createElement("option");
+      opt.value = k;
+      opt.textContent = k;
+      koedSelect3.appendChild(opt);
+    });
+
+  opdaterPizzaFilter();
+});
+koedSelect3.addEventListener("change", () => {
+  valgtKoed3 = koedSelect3.value;
+  opdaterPizzaFilter();
+});
+
+const nulstilFilterBtn = document.getElementById("nulstilFilterBtn");
+
+nulstilFilterBtn.addEventListener("click", () => {
+  // nulstil værdier
+  valgtKoed1 = "";
+  valgtKoed2 = "";
+  valgtKoed3 = "";
+
+  // nulstil dropdowns
+  koedSelect.value = "";
+  koedSelect2.value = "";
+  koedSelect3.value = "";
+
+  koedSelect2.disabled = true;
+  koedSelect3.disabled = true;
+
+  // ryd dropdown 2 og 3 indhold
+  koedSelect2.innerHTML = `<option value="">– Intet ekstra valg –</option>`;
+  koedSelect3.innerHTML = `<option value="">– Intet ekstra valg –</option>`;
+
+  // vis alle pizzaer igen
+  opdaterPizzaFilter();
+});
 
   btn.onclick = () => {
     valgtPizza = pizza;
