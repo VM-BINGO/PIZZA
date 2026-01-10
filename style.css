@@ -17,7 +17,7 @@ html, body {
 }
 
 #app {
-  max-width: 1440px;
+  max-width: 1920px;
   margin: 0 auto;
   padding: 12px;
 }
@@ -126,14 +126,14 @@ input[type="text"] {
 .pizza-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 4px;
 }
 
 /* Lodrette kolonner */
 .pizza-col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 /* =========================
@@ -170,7 +170,7 @@ input[type="text"] {
 
 /* Tekst */
 .pizza-title {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   line-height: 1.2;
   position: absolute;
@@ -185,7 +185,7 @@ input[type="text"] {
   left: 10px;
   bottom: 8px;
 
-  font-size: 0.75rem;
+  font-size: 0.80rem;
   font-weight: 500;
 }
 
@@ -245,7 +245,7 @@ input[type="text"] {
 }
 
 .tilvalg-btn.valgt {
-  background: #9ca3af;
+  background: #4caf50;
   border-color: #6b7280;
 }
 
@@ -317,7 +317,7 @@ input[type="text"] {
   background: #e5e7eb;
   border-radius: 8px;
   padding: 10px 12px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   font-size: 0.9rem;
 
   display: block;          /* 👈 VIGTIGT */
@@ -343,7 +343,7 @@ input[type="text"] {
   cursor: pointer;
 
   color: #dc2626;          /* rød */
-  font-size: 1.1rem;       /* en anelse større */
+  font-size: 1.4rem;       /* en anelse større */
   font-weight: 600;
 
   margin-left: 8px;        /* 👈 luft fra teksten */
@@ -422,7 +422,7 @@ input[type="text"] {
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .liste-header h2 {
@@ -472,7 +472,7 @@ input[type="text"] {
 
   font-size: 0.8rem;
   color: #000;
-  opacity: 0.6;
+  opacity: 0.6;s
 }
 
 .mobilepay-edit:hover {
@@ -489,3 +489,58 @@ input[type="text"] {
   font-weight: 500;
   opacity: 0.8;
 }
+.bestilling-row {
+  display: grid;
+  grid-template-columns: 60px 140px 50px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+/* Header */
+.bestilling-row.header {
+  font-weight: 700;
+  border-bottom: 2px solid #000;
+  margin-bottom: 6px;
+}
+
+.bestilling-row.header span {
+  font-size: 13px;
+}
+
+.bestilling-row input[type="checkbox"] {
+  justify-self: center;
+}
+/* =========================
+   ZEBRA-RÆKKER (WEB)
+   ========================= */
+
+/* spring headeren over */
+.bestilling-row:not(.header):nth-child(odd) {
+  background-color: #e5e7eb; /* samme som cards */
+  border: 0.5px solid #000000;
+  border-radius: 10px;
+  margin-bottom: 6px;
+
+}
+
+.bestilling-row:not(.header):nth-child(even) {
+  background-color: #f3f4f6; /* lidt mørkere */
+  border: 0.5px solid #000000;
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+.valgt-pizza-info {
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background-color: #e8f5e9;   /* lys grøn */
+  border-left: 4px solid #4caf50;
+  font-weight: 600;
+  font-size: 18px;
+  border-radius: 4px;
+}
+
+.hidden {
+  display: none;
+}
+
