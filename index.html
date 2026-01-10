@@ -44,7 +44,47 @@
   <!-- INPUT SEKTION -->
   <section class="card">
 
-    <h2>Vælg pizza</h2>
+   <div id="koedFilterRow">
+  <div class="koed-filter">
+    <label for="koedSelect"><strong>1. Fyld</strong></label>
+    <select id="koedSelect">
+      <option value="">– Alle pizzaer –</option>
+    </select>
+  </div>
+
+  <div class="koed-filter">
+    <label for="koedSelect2"><strong>2. Fyld</strong></label>
+    <select id="koedSelect2" disabled>
+      <option value="">– Intet ekstra valg –</option>
+    </select>
+  </div>
+
+  <div class="koed-filter">
+  <label for="koedSelect3"><strong>3. Fyld</strong></label>
+  <select id="koedSelect3" disabled>
+    <option value="">– Intet ekstra valg –</option>
+  </select>
+</div>
+<button
+  id="nulstilFilterBtn"
+  type="button"
+  class="filter-reset-btn"
+>
+  ↺ Nulstil filter
+</button>
+
+<button
+  id="hurtigLucaBtn"
+  type="button"
+  class="filter-quick-btn"
+>
+  ⭐ Luca 32
+</button>
+
+
+</div>
+
+
     <div id="pizzaGrupper" class="pizza-grupper">
       <!-- genereres af JS -->
     </div>
