@@ -17,7 +17,7 @@ html, body {
 }
 
 #app {
-  max-width: 1920px;
+  max-width: 1800px;
   margin: 0 auto;
   padding: 12px;
 }
@@ -446,7 +446,7 @@ input[type="text"] {
   background: #fde047;
   border: 3px solid #000000;
   border-radius: 14px;
-  padding: 10px 14px;
+  padding: 10px 100px;
 
   min-width: 150px;
   text-align: center;
@@ -544,3 +544,66 @@ input[type="text"] {
   display: none;
 }
 
+#koedFilterRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.koed-filter {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.koed-filter label {
+text-align: center;
+  font-size: 1.25rem;
+  margin-bottom: 4px;
+color: #000; 
+}
+
+.koed-filter select {
+  padding: 6px;
+border-radius: 6px;   /* 👈 afrunding */
+  font-size: 0.95rem;
+font-weight: 600;
+}
+/* ===== FILTER: NULSTIL ===== */
+.filter-reset-btn {
+  margin-left: 12px;
+  padding: 6px 10px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;            /* 👈 pill-form */
+  border: 0.5px solid #000000;         /* 👈 utility-look */
+  background: #e8f5e9;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-reset-btn:hover {
+  background: #f3f3f3;
+  border-color: #999;
+  color: #000;
+}
+/* ===== FILTER: HURTIG PIZZA ===== */
+.filter-quick-btn {
+  margin-left: 6px;
+  padding: 6px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 0.5px solid #000000;
+  font-weight: 600;
+  background: #fffbe6;          /* let gul hint */
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-quick-btn:hover {
+  background: #fff1b8;
+  border-color: #999;
+}
