@@ -129,6 +129,12 @@ infoIcon.addEventListener("click", e => {
     dressingBtn.disabled = false;
     hvidlogBtn.disabled = false;
 
+      // 👇 NYT: vis valgt pizza over navnefeltet
+  const info = document.getElementById("valgtPizzaInfo");
+  info.textContent = `Du har valgt nr. ${pizza.nr} – ${pizza.navn}`;
+  info.classList.remove("hidden");
+
+    navnInput.focus();
     };
 
   cols[colIndex].appendChild(btn);
@@ -209,7 +215,8 @@ const totalPris = beregnPris(valgtPizza, {
   dressing,
   hvidlog,
   kommentar: kommentarInput.value.trim(),
-  pris: totalPris   // 👈 NY
+  pris: totalPris,
+  betalt: false   // 👈 NY
 });
 
 
@@ -224,7 +231,7 @@ dressingBtn.classList.remove("valgt");
 hvidlogBtn.classList.remove("valgt");
 
 kommentarInput.value = "";
-
+document.getElementById("valgtPizzaInfo").classList.add("hidden");
   navnInput.value = "";
   visBestillinger();
   visSamletListe();
@@ -243,6 +250,8 @@ navnInput.addEventListener("keydown", (e) => {
     if (!ok) return;
 
     document.getElementById("tilføjBtn").click();
+    
+
   }
 });
 
@@ -252,6 +261,18 @@ navnInput.addEventListener("keydown", (e) => {
 function visBestillinger() {
   bestillingerDiv.innerHTML = "";
 
+const header = document.createElement("div");
+header.className = "bestilling-row header";
+header.innerHTML = `
+  <span>Betalt</span>
+  <span>Navn</span>
+  <span>Nr</span>
+  <span>Pizza</span>
+  <span></span>
+`;
+bestillingerDiv.appendChild(header);
+
+
   // SORTÉR ALTID ved visning (dansk alfabet)
   const sorterede = [...bestillinger].sort((a, b) =>
     a.navn.localeCompare(b.navn, "da", { sensitivity: "base" })
@@ -259,7 +280,7 @@ function visBestillinger() {
 
   sorterede.forEach(b => {
     const div = document.createElement("div");
-    div.className = "bestilling";
+    div.className = "bestilling-row";
 
     // ===== PRIS (fallback for gamle data)
     const pris =
@@ -271,7 +292,7 @@ function visBestillinger() {
             hvidlog: b.hvidlog
           });
 
-    // ===== TEKST TIL SKÆRM (uændret)
+    // ===== TEKST TIL SKÆRM
     let tekst = `${b.navn}: ${b.pizza.nr} ${b.pizza.navn}`;
 
     const tilvalg = [];
@@ -292,9 +313,20 @@ function visBestillinger() {
     const tekstSpan = document.createElement("span");
     tekstSpan.textContent = tekst;
 
-    // ===== EKSTRA MARKUP TIL PRINT (skjult på skærm)
+    // ===== CHECKBOX (BETALT) – WEBSIDE
+    const betaltCheckbox = document.createElement("input");
+    betaltCheckbox.type = "checkbox";
+    betaltCheckbox.checked = b.betalt === true;
+    betaltCheckbox.title = "Marker som betalt";
+
+    betaltCheckbox.onchange = () => {
+      b.betalt = betaltCheckbox.checked;
+      gemBestillinger();
+    };
+
+    // ===== EKSTRA MARKUP TIL PRINT
     const printNavn = document.createElement("span");
-    printNavn.className = "print-navn";
+    printNavn.className = b.betalt ? "print-navn betalt" : "print-navn";
     printNavn.textContent = b.navn.toUpperCase();
 
     const printBestilling = document.createElement("span");
@@ -308,16 +340,31 @@ function visBestillinger() {
 
     printBestilling.textContent = bestilTekst;
 
-    // container til print (bruges kun af print-CSS)
-    const printContainer = document.createElement("span");
-    printContainer.className = "print-row";
-    printContainer.appendChild(printNavn);
-    printContainer.appendChild(printBestilling);
+   const printContainer = document.createElement("span");
+printContainer.className = "print-row";
 
-    div.appendChild(tekstSpan);
-    div.appendChild(printContainer);
+// 👇 DETTE ER DET VIGTIGE
+if (b.betalt) {
+  printContainer.classList.add("betalt");
+}
 
-    // ===== SLET-KNAP
+printContainer.appendChild(printNavn);
+printContainer.appendChild(printBestilling);
+
+
+    // ===== SAMLE DOM
+   // Navn
+const navnSpan = document.createElement("span");
+navnSpan.textContent = b.navn;
+
+// Nr
+const nrSpan = document.createElement("span");
+nrSpan.textContent = b.pizza.nr;
+
+// Pizza + tilvalg
+const pizzaSpan = document.createElement("span");
+pizzaSpan.textContent = tekstSpan.textContent.replace(`${b.navn}: `, "");
+   // ===== SLET-KNAP
     const sletBtn = document.createElement("button");
     sletBtn.textContent = "✖";
     sletBtn.className = "slet-knap";
@@ -333,11 +380,24 @@ function visBestillinger() {
       visSamletListe();
       opdaterTotalAntal();
     };
+// Saml DOM i korrekt rækkefølge
+div.appendChild(betaltCheckbox);
+div.appendChild(navnSpan);
+div.appendChild(nrSpan);
+div.appendChild(pizzaSpan);
+div.appendChild(sletBtn);
+
+// Print (skjult på web)
+div.appendChild(printContainer);
+
+
+ 
 
     div.appendChild(sletBtn);
     bestillingerDiv.appendChild(div);
   });
 }
+
 
 // ===== Vis Samlet Liste =====
 
@@ -378,6 +438,7 @@ function visSamletListe() {
 
     if (!samlet[nr]) {
       samlet[nr] = {
+        nr: nr,
         navn: b.pizza.navn,
         total: 0,
         counts: {},
@@ -411,9 +472,9 @@ function visSamletListe() {
 
     const title = document.createElement("div");
     title.className = "bestilling-title";
-    title.innerHTML = `
+title.innerHTML = `
   <span class="antal-linje">
-    ${data.total} x ${data.navn}
+    ${data.total} x ${data.nr} ${data.navn}
   </span>
 `;
 
@@ -561,6 +622,9 @@ document.getElementById("klarBtn").onclick = () => {
 
   // ===== PRINT (din eksisterende print-kode fortsætter her)
   const printWindow = window.open("", "", "width=900,height=700");
+  
+  // 🔄 Tving opdatering så betalt-status er korrekt
+visBestillinger();
 
   const pizzariaHTML = samletListeDiv.innerHTML;
   const internHTML = bestillingerDiv.innerHTML;
@@ -568,103 +632,114 @@ document.getElementById("klarBtn").onclick = () => {
   // 👇 her indsætter du dit printWindow.document.write(...)
 
   // ===== PRINT
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Pizzabestilling</title>
+printWindow.document.write(`
+<html>
+  <head>
+    <title>Pizzabestilling</title>
 
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            padding: 10mm;
-            color: #000;
-          }
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 10mm;
+        color: #000;
+      }
 
-          h2 {
-            margin: 0 0 10px 0;
-            border-bottom: 2px solid #000;
-            padding-bottom: 6px;
-          }
+      h2 {
+        margin: 0 0 10px 0;
+        border-bottom: 2px solid #000;
+        padding-bottom: 6px;
+      }
 
-          .print-section {
-            display: block;
-          }
+      .print-section {
+        display: block;
+      }
 
-          .page-after {
-            page-break-after: always;
-          }
+      .page-after {
+        page-break-after: always;
+      }
 
-          .slet-knap {
-            display: none;
-          }
+      /* =========================
+         SKJUL WEB-ELEMENTER
+         ========================= */
+      input[type="checkbox"],
+      .slet-knap {
+        display: none !important;
+      }
 
-          .bestilling {
-            margin-bottom: 14px;
-          }
+      /* =========================
+         INTERN LISTE – PRINT
+         ========================= */
 
-          .bestilling > span:first-child {
-            display: none;
-          }
+      /* skjul ALT i web-rækken */
+      .bestilling-row > * {
+        display: none !important;
+      }
 
-          .print-row {
-            display: grid;
-            grid-template-columns: 12ch 1fr;
-            column-gap: 14px;
-            font-size: 12pt;
-            line-height: 1.4;
-          }
+      /* vis KUN print-rækken */
+      .bestilling-row .print-row {
+        display: grid !important;
+        grid-template-columns: 28px 120px 1fr;
+        column-gap: 12px;
+        font-size: 12pt;
+        line-height: 1.4;
+        margin-bottom: 8px;
+        align-items: center;
+      }
 
-          .print-navn {
-            font-weight: 300;
-            white-space: nowrap;
-          }
+      /* checkbox-felt */
+      .print-row::before {
+        content: "☐";
+        font-size: 16px;
+      }
 
-          .print-navn::before {
-            content: "";
-            display: inline-block;
-  	    width: 14px;
-  	    height: 14px;
- 	    border: 2px solid #000;
- 	    margin-right: 6px;
-  	    vertical-align: middle;
-	  }
+      .print-row.betalt::before {
+        content: "☑";
+      }
 
+      .print-navn {
+        font-weight: 700;
+        white-space: nowrap;
+      }
 
-          .print-bestilling {
-            white-space: nowrap;
-          }
-        </style>
-      </head>
+      .print-bestilling {
+        white-space: nowrap;
+      }
+    </style>
+  </head>
 
-      <body>
+  <body>
 
-        <div class="print-section page-after">
-          <h2>
-            🍕 Bestillingsliste (pizzaria)
-            <span class="total-antal">
-              – ${totalPizzaer} pizzaer i alt – ${totalPris} kr.
-            </span>
-          </h2>
-          ${pizzariaHTML}
-        </div>
+    <!-- PIZZARIA LISTE -->
+    <div class="print-section page-after">
+      <h2>
+        🍕 Bestillingsliste (pizzaria)
+        <span class="total-antal">
+          – ${totalPizzaer} pizzaer i alt – ${totalPris} kr.
+        </span>
+      </h2>
 
-        <div class="print-section">
-          <h2>👤 Intern bestillingsliste</h2>
-          ${internHTML}
-        </div>
+      ${pizzariaHTML}
+    </div>
 
-        <script>
-          window.onload = () => {
-            window.print();
-            window.close();
-          };
-        </script>
+    <!-- INTERN LISTE -->
+    <div class="print-section">
+      <h2>👤 Intern bestillingsliste</h2>
+      ${internHTML}
+    </div>
 
-      </body>
-    </html>
-  `);
+    <script>
+      window.onload = () => {
+        window.print();
+        window.close();
+      };
+    </script>
 
-  printWindow.document.close();
+  </body>
+</html>
+`);
+
+printWindow.document.close();
+
 };
 
 function loadMobilePay() {
