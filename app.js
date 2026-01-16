@@ -26,8 +26,7 @@ const KOED_TYPER = [
   "cocktailpølser",
   "fisk",
   "rejer",
-  "pulled pork",
-  "vegetar"
+  "pulled pork"
 ];
 
 // ===== DOM =====
@@ -45,6 +44,11 @@ const TILVALG_PRISER = {
   dressing: 0,
   hvidlog: 0
 };
+const pizzaTooltip = document.createElement("div");
+pizzaTooltip.className = "pizza-tooltip";
+document.body.appendChild(pizzaTooltip);
+
+let tooltipTimer = null;
 
 chiliBtn.textContent = `🌶️ Chili (+${TILVALG_PRISER.chili} kr)`;
 dressingBtn.textContent = `🥫 Dressing (+${TILVALG_PRISER.dressing} kr)`;
@@ -125,21 +129,69 @@ const rows = Math.ceil(gruppePizzaer.length / 3);
 gruppePizzaer.forEach((pizza, index) => {
   const colIndex = Math.floor(index / rows);
 
-  const btn = document.createElement("button");
+const btn = document.createElement("button");
+
+btn.classList.add("pizza-btn");
+
+if (pizza.nr === 23) {
+  btn.classList.add("veg-special");
+}
+
 btn.dataset.koedMatch = pizza.beskrivelse?.toLowerCase() || "";
-   btn.className = "pizza-btn";
-  btn.innerHTML = `
-  <div class="pizza-title">${pizza.nr} – ${pizza.navn}</div>
+
+btn.innerHTML = `
+  <div class="pizza-title">
+    ${pizza.nr} – ${pizza.navn}
+    ${pizza.nr === 23 ? '<span class="veg-icon">🥬</span>' : ''}
+  </div>
   <div class="pizza-price">${pizza.pris} kr</div>
   <span class="pizza-info-icon">i</span>
 `;
 btn.dataset.pizzaNr = pizza.nr;
+
 
 const infoIcon = btn.querySelector(".pizza-info-icon");
 infoIcon.addEventListener("click", e => {
   e.stopPropagation();
   åbnInfoPopup(pizza);
 });
+// ===== HOVER TOOLTIP (0,6s delay) =====
+btn.addEventListener("mouseenter", e => {
+  clearTimeout(tooltipTimer);
+
+  tooltipTimer = setTimeout(() => {
+    const text = pizza.beskrivelse || "Ingen beskrivelse";
+
+    pizzaTooltip.textContent = text;
+
+const rect = btn.getBoundingClientRect();
+const scrollX = window.pageXOffset;
+const scrollY = window.pageYOffset;
+
+const tooltipWidth = 280;
+const margin = 10;
+
+let left = rect.right + scrollX + margin;
+
+// hvis der ikke er plads til højre → vis til venstre
+if (left + tooltipWidth > window.innerWidth + scrollX) {
+  left = rect.left + scrollX - tooltipWidth - margin;
+}
+
+pizzaTooltip.style.left = left + "px";
+pizzaTooltip.style.top = rect.top + scrollY + "px";
+
+
+
+    pizzaTooltip.classList.add("show");
+  }, 600);
+});
+
+btn.addEventListener("mouseleave", () => {
+  clearTimeout(tooltipTimer);
+  pizzaTooltip.classList.remove("show");
+});
+
 document.getElementById("hurtigLucaBtn").addEventListener("click", () => {
   const lucaBtn = document.querySelector(
     '.pizza-btn[data-pizza-nr="32"]'
@@ -555,37 +607,71 @@ nrSpan.textContent = b.pizza.nr;
 // Pizza + tilvalg
 const pizzaSpan = document.createElement("span");
 pizzaSpan.textContent = tekstSpan.textContent.replace(`${b.navn}: `, "");
-   // ===== SLET-KNAP
-    const sletBtn = document.createElement("button");
-    sletBtn.textContent = "✖";
-    sletBtn.className = "slet-knap";
 
-    sletBtn.onclick = () => {
-      if (!confirm("Slet denne bestilling?")) return;
+// ===== KNAP-CONTAINER (holder ✏️ og ❌ på samme linje) =====
+const actionBox = document.createElement("span");
+actionBox.className = "action-box";
 
-      const realIndex = bestillinger.indexOf(b);
-      bestillinger.splice(realIndex, 1);
+// ===== REDIGER-KNAP =====
+const redigerBtn = document.createElement("button");
+redigerBtn.textContent = "✏️";
+redigerBtn.className = "rediger-knap";
 
-      gemBestillinger();
-      visBestillinger();
-      visSamletListe();
-      opdaterTotalAntal();
-    };
-// Saml DOM i korrekt rækkefølge
+redigerBtn.onclick = () => {
+  if (window.orderLocked) {
+    alert("Ordren er låst og kan ikke ændres.");
+    return;
+  }
+
+  const nytNavn = prompt("Ret navn:", b.navn);
+  if (!nytNavn) return;
+
+  b.navn = nytNavn.trim();
+
+  gemBestillinger();
+  visBestillinger();
+  visSamletListe();
+  opdaterTotalAntal();
+};
+
+// ===== SLET-KNAP =====
+const sletBtn = document.createElement("button");
+sletBtn.textContent = "✖";
+sletBtn.className = "slet-knap";
+
+sletBtn.onclick = () => {
+  if (window.orderLocked) {
+    alert("Ordren er låst og kan ikke ændres.");
+    return;
+  }
+
+  if (!confirm("Slet denne bestilling?")) return;
+
+  const realIndex = bestillinger.indexOf(b);
+  bestillinger.splice(realIndex, 1);
+
+  gemBestillinger();
+  visBestillinger();
+  visSamletListe();
+  opdaterTotalAntal();
+};
+
+// ===== SAML KNAPPERNE I BOKSEN =====
+actionBox.appendChild(redigerBtn);
+actionBox.appendChild(sletBtn);
+
+// ===== SAML DOM I RÆKKEN (KUN ÉN GANG) =====
 div.appendChild(betaltCheckbox);
 div.appendChild(navnSpan);
 div.appendChild(nrSpan);
 div.appendChild(pizzaSpan);
-div.appendChild(sletBtn);
+div.appendChild(actionBox);
 
 // Print (skjult på web)
 div.appendChild(printContainer);
 
+bestillingerDiv.appendChild(div);
 
- 
-
-    div.appendChild(sletBtn);
-    bestillingerDiv.appendChild(div);
   });
 }
 
@@ -795,21 +881,50 @@ document.getElementById("klarBtn").onclick = () => {
     totalPris += pris;
   });
 
-  // ===== SEND MAIL (KUN EFTER OK)
-  fetch("https://formspree.io/f/xnjneddp", {
-    method: "POST",
-    headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message:
-        `Pizzaordre afsluttet\n` +
-        `Antal pizzaer: ${totalPizzaer}\n` +
-        `Samlet beløb: ${totalPris} kr.`,
-      tidspunkt: new Date().toLocaleString("da-DK")
-    })
+// ===== BYG TEKSTLISTE TIL MAIL =====
+const samletMailListe = (() => {
+  const samlet = {};
+
+  bestillinger.forEach(b => {
+    const nr = b.pizza.nr;
+    const navn = b.pizza.navn;
+
+    if (!samlet[nr]) {
+      samlet[nr] = {
+        navn,
+        total: 0
+      };
+    }
+
+    samlet[nr].total++;
   });
+
+  return Object.entries(samlet)
+    .sort((a, b) => b[1].total - a[1].total) // mest solgte øverst
+    .map(([nr, data]) => {
+      return `${data.total}x  Nr. ${nr} – ${data.navn}`;
+    })
+    .join("\n");
+})();
+
+// ===== SEND MAIL (KUN EFTER OK)
+fetch("https://formspree.io/f/xnjneddp", {
+  method: "POST",
+  headers: {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    message:
+      `Pizzaordre afsluttet\n\n` +
+      `Antal pizzaer: ${totalPizzaer}\n` +
+      `Samlet beløb: ${totalPris} kr.\n\n` +
+      `🍕 Pizzafordeling:\n` +
+      `${samletMailListe}`,
+    tidspunkt: new Date().toLocaleString("da-DK")
+  })
+});
+
 
   // ===== PRINT (din eksisterende print-kode fortsætter her)
   const printWindow = window.open("", "", "width=900,height=700");
@@ -948,7 +1063,19 @@ function loadMobilePay() {
 `;
 
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const logo = document.querySelector(".app-logo img");
+  if (!logo) return;
 
+  logo.addEventListener("click", () => {
+    // nulstil animation hvis man klikker hurtigt flere gange
+    logo.style.animation = "none";
+    void logo.offsetWidth; // force reflow
+    logo.style.animation = "logo-click 0.35s ease";
+  });
+});
+
+   
 document.addEventListener("DOMContentLoaded", () => {
   loadMobilePay();
 
@@ -991,5 +1118,4 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 };
 
-   
 });
