@@ -207,7 +207,7 @@ document.getElementById("hurtigLucaBtn").addEventListener("click", () => {
   // 2️⃣ scroll TIL NAVNEFELTET og fokusér
   setTimeout(() => {
     navnInput.scrollIntoView({ behavior: "smooth", block: "center" });
-    navnInput.focus();s
+    navnInput.focus();
     navnInput.select(); // marker evt. tekst
   }, 300);
 });
@@ -1047,75 +1047,135 @@ printWindow.document.write(`
 printWindow.document.close();
 
 };
-
-function loadMobilePay() {
+// =========================
+// MOBILEPAY + QR SYSTEM (CLEAN + STABLE)
+// =========================
+document.addEventListener("DOMContentLoaded", () => {
   const mpBox = document.querySelector(".mobilepay-box");
-  if (!mpBox) return;
-
-  const gemt = JSON.parse(localStorage.getItem("mobilepayBox"));
-  if (!gemt) return;
-
-  mpBox.dataset.mobilepayName = gemt.name;
-  mpBox.dataset.mobilepayBox = gemt.box;
-  mpBox.querySelector(".mobilepay-code").innerHTML = `
-  <div class="mp-box-nr">${gemt.box}</div>
-  <div class="mp-box-navn">${gemt.name}</div>
-`;
-
-}
-document.addEventListener("DOMContentLoaded", () => {
-  const logo = document.querySelector(".app-logo img");
-  if (!logo) return;
-
-  logo.addEventListener("click", () => {
-    // nulstil animation hvis man klikker hurtigt flere gange
-    logo.style.animation = "none";
-    void logo.offsetWidth; // force reflow
-    logo.style.animation = "logo-click 0.35s ease";
-  });
-});
-
-   
-document.addEventListener("DOMContentLoaded", () => {
-  loadMobilePay();
-
   const editBtn = document.querySelector(".mobilepay-edit");
-  const mpBox = document.querySelector(".mobilepay-box");
+  const qrUpload = document.getElementById("mpQrUpload");
+  const qrImage = document.getElementById("mpQrImage");
+  const deleteBtn = document.getElementById("mpQrDelete");
 
-  if (!editBtn || !mpBox) return;
-
-  editBtn.onclick = () => {
-  const nytNavn = prompt(
-    "Navn på MobilePay boks:",
-    mpBox.dataset.mobilepayName
-  );
-  if (!nytNavn) return;
-
-  const nytNummer = prompt(
-    "MP BOX nummer:",
-    mpBox.dataset.mobilepayBox
-  );
-  if (!nytNummer) return;
-
-  // gem data
-  mpBox.dataset.mobilepayName = nytNavn;
-  mpBox.dataset.mobilepayBox = nytNummer;
-
-  // 👇 VIS NUMMERET I DEN GULE BOKS
-  mpBox.querySelector(".mobilepay-code").innerHTML = `
-  <div class="mp-box-nr">${nytNummer}</div>
-  <div class="mp-box-navn">${nytNavn}</div>
-`;
+  if (!mpBox || !editBtn || !qrUpload || !qrImage || !deleteBtn) {
+    console.warn("❌ MobilePay elements missing");
+    return;
+  }
 
 
+  // =====================
+  // LOAD SAVED BOX
+  // =====================
+  const gemt = JSON.parse(localStorage.getItem("mobilepayBox"));
+  if (gemt) {
+    mpBox.dataset.mobilepayName = gemt.name;
+    mpBox.dataset.mobilepayBox = gemt.box;
 
-  localStorage.setItem(
-    "mobilepayBox",
-    JSON.stringify({
-      name: nytNavn,
-      box: nytNummer
-    })
-  );
-};
+    mpBox.querySelector(".mobilepay-code").innerHTML = `
+      <div class="mp-box-nr">${gemt.box}</div>
+      <div class="mp-box-navn">${gemt.name}</div>
+    `;
+  }
 
+  // =====================
+  // LOAD SAVED QR
+  // =====================
+  const gemtQR = localStorage.getItem("mobilepayQR");
+  if (gemtQR) {
+    qrImage.src = gemtQR;
+    qrImage.classList.remove("hidden");
+    deleteBtn.classList.remove("hidden");
+  }
+
+  // =====================
+  // PEN CLICK
+  // =====================
+  editBtn.addEventListener("click", () => {
+    const valg = confirm(
+      "OK = Ret MobilePay navn/nummer\nAnnuller = Upload QR-kode"
+    );
+
+    // Upload QR
+    if (!valg) {
+      qrUpload.value = "";
+      qrUpload.click();
+      return;
+    }
+
+    // Rediger boks
+    const nytNavn = prompt(
+      "Navn på MobilePay boks:",
+      mpBox.dataset.mobilepayName || ""
+    );
+    if (!nytNavn) return;
+
+    const nytNummer = prompt(
+      "MP BOX nummer:",
+      mpBox.dataset.mobilepayBox || ""
+    );
+    if (!nytNummer) return;
+
+    mpBox.dataset.mobilepayName = nytNavn;
+    mpBox.dataset.mobilepayBox = nytNummer;
+
+    mpBox.querySelector(".mobilepay-code").innerHTML = `
+      <div class="mp-box-nr">${nytNummer}</div>
+      <div class="mp-box-navn">${nytNavn}</div>
+    `;
+
+    localStorage.setItem(
+      "mobilepayBox",
+      JSON.stringify({ name: nytNavn, box: nytNummer })
+    );
+  });
+
+  // =====================
+  // QR UPLOAD
+  // =====================
+  qrUpload.addEventListener("change", () => {
+    const file = qrUpload.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      qrImage.src = reader.result;
+      qrImage.classList.remove("hidden");
+      deleteBtn.classList.remove("hidden");
+
+      localStorage.setItem("mobilepayQR", reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  // =====================
+  // DELETE QR
+  // =====================
+  deleteBtn.addEventListener("click", () => {
+    if (!confirm("Vil du fjerne QR-koden?")) return;
+
+    qrImage.src = "";
+    qrImage.classList.add("hidden");
+    deleteBtn.classList.add("hidden");
+
+    localStorage.removeItem("mobilepayQR");
+  });
+
+  console.log("✅ MobilePay system loaded cleanly");
 });
+
+function openQrOverlay(src) {
+  if (!src) return;
+
+  const overlay = document.getElementById("qrOverlay");
+  const img = document.getElementById("qrOverlayImg");
+
+  img.src = src;
+  overlay.style.display = "flex";
+}
+
+function closeQrOverlay() {
+  document.getElementById("qrOverlay").style.display = "none";
+}
+
+
