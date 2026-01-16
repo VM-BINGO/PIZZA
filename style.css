@@ -1,3 +1,27 @@
+:root {
+  /* Background */
+  --bg-main: #faf7f2;
+  --bg-gradient: linear-gradient(180deg, #fdfaf5 0%, #f3ede4 100%);
+
+  /* Surfaces */
+  --surface: #ffffff;
+  --surface-soft: #f6efe6;
+
+  /* Brand colors (warm) */
+  --primary: #d97706;   /* varm pizza-orange */
+  --accent: #b45309;   /* mørkere chili */
+  --success: #16a34a;  /* salat-grøn */
+  --warning: #f59e0b;  /* gul / MobilePay */
+
+  /* Borders */
+  --border: #e2d6c3;
+  --border-soft: #eadfce;
+
+  /* Text */
+  --text-main: #2a1f14;
+  --text-soft: #5c4b3a;
+}
+
 /* =========================
    RESET & BASIS
    ========================= */
@@ -6,15 +30,16 @@
   margin: 0;
   padding: 0;
 }
-
 html, body {
-  background: #f3f4f6;
-  color: #111827;
+  margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
                Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
                "Helvetica Neue", sans-serif;
   line-height: 1.4;
+  background: var(--bg-gradient);
+  color: var(--text-main);
 }
+
 
 #app {
   max-width: 1800px;
@@ -62,13 +87,11 @@ html, body {
    KORT / SEKTIONER
    ========================= */
 .card {
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  padding: 14px;
-  margin-bottom: 14px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  padding: 16px;
 }
-
 /* =========================
    INPUT
    ========================= */
@@ -100,27 +123,30 @@ input[type="text"] {
 
 /* Én gruppe (fx 1–9) */
 .pizza-gruppe {
-  background: #d1d5db;
-  border-radius: 10px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
   padding: 12px;
 }
 
+
 /* Gruppe-overskrift */
 .gruppe-header {
-  margin-bottom: 5px;
-  padding: 5px 0;
-
-  width: 100%;              /* 👈 fylder samme bredde som grid */
+  margin-bottom: 8px;
+  padding: 6px 0;
+  width: 100%;
   text-align: center;
 
-  font-size: 1.15rem;        /* tydelig større */
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 
-  background: #e5e7eb;
-  border: 2px solid #000000;
+  background: linear-gradient(180deg, #fff7ed, #f3e8d8);
+  border: 1px solid var(--primary);
   border-radius: 12px;
+  color: var(--primary);
 }
+
 
 
 /* Grid med 3 kolonner */
@@ -147,26 +173,30 @@ input[type="text"] {
   min-height: 64px;
   padding: 10px 12px;
 
-  background: #e5e7eb;
-  color: #000000;
+  background: #ffffff;
+  color: var(--text-main);
 
-  border: 2px solid #000000;
+  border: 1px solid var(--border-soft);
   border-radius: 14px;
 
   cursor: pointer;
-
   display: grid;
   grid-template-rows: auto 1fr;
+
+  box-shadow: 0 2px 6px rgba(90, 60, 20, 0.12);
 }
 
+
 .pizza-btn:hover {
-  background: #f3f4f6;
+  background: #fffaf3;
+  box-shadow: 0 6px 14px rgba(90, 60, 20, 0.2);
 }
+
 
 .pizza-btn.valgt,
 .pizza-btn.active {
-  background: #9ca3af;
-  border-color: #6b7280;
+  background: #fff3e0;
+  border: 2px solid var(--primary);
 }
 
 /* Tekst */
@@ -202,7 +232,7 @@ input[type="text"] {
   height: 18px;
   border-radius: 5px;
 
-  background: #60a5fa;
+  background: var(--primary);
   color: #ffffff;
 
   font-size: 0.7rem;
@@ -442,6 +472,18 @@ input[type="text"] {
 /* =========================
    MOBILEPAY BOKS
    ========================= */
+.mobilepay-logo {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+
+  width: 28px;
+  height: auto;
+
+  pointer-events: none; /* så man stadig kan klikke i boksen */
+  opacity: 0.9;
+}
 
 .mobilepay-box {
   position: fixed;
@@ -450,13 +492,16 @@ input[type="text"] {
 
   z-index: 1000;
 
-  background: #fde047;
-  border: 3px solid #000000;
-  border-radius: 14px;
-  padding: 10px 50px;
+  background: linear-gradient(180deg, #eaf0ff 0%, #dbe4ff 100%);
+  border: 3px solid #5b7cfa;
+  border-radius: 16px;
 
+  padding: 14px 52px 14px 52px;
   text-align: center;
+
+  box-shadow: 0 10px 24px rgba(91, 124, 250, 0.35);
 }
+
 
 
 .mobilepay-title {
@@ -472,19 +517,32 @@ input[type="text"] {
   letter-spacing: 0.12em;
 }
 .mobilepay-edit {
-  margin-top: 6px;
-  background: none;
-  border: none;
+  position: absolute;
+  top: 6px;
+  left: 6px;
+
+  background: white;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  border: 1px solid #5b7cfa;
   cursor: pointer;
 
-  font-size: 0.8rem;
-  color: #000;
-  opacity: 0.6;s
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
+
 .mobilepay-edit:hover {
-  opacity: 1;
+  background: #fff7ed;
+  transform: scale(1.1);
 }
+
 .mp-box-nr {
   font-size: 25px;
   font-weight: 700;
@@ -498,7 +556,7 @@ input[type="text"] {
 }
 .bestilling-row {
   display: grid;
-  grid-template-columns: 60px 140px 50px 1fr 40px;
+  grid-template-columns: 50px 140px 50px 1fr 80px;
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
@@ -524,16 +582,18 @@ input[type="text"] {
 
 /* spring headeren over */
 .bestilling-row:not(.header):nth-child(odd) {
-  background-color: #e5e7eb; /* samme som cards */
-  border: 0.5px solid #000000;
+  background-color: #fffaf3;
+  border: 1px solid var(--border-soft);
+
   border-radius: 10px;
   margin-bottom: 6px;
 
 }
 
 .bestilling-row:not(.header):nth-child(even) {
-  background-color: #f3f4f6; /* lidt mørkere */
-  border: 0.5px solid #000000;
+  background-color: #fffaf3;
+  border: 1px solid var(--border-soft);
+
   border-radius: 10px;
   margin-bottom: 6px;
 }
@@ -614,3 +674,111 @@ font-weight: 600;
   background: #fff1b8;
   border-color: #999;
 }
+.veg-special {
+  background: #e9f8e9;
+  border: 2px solid #8fd18f;
+}
+
+.veg-special .pizza-title {
+  color: #1f6b1f;
+  font-weight: 700;
+}
+
+.veg-icon {
+  margin-left: 6px;
+  font-size: 1.1rem;
+}
+.liste-boks {
+  background: #ffffff;
+  border: 1px solid #e3e7ec;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.liste-boks h2 {
+  margin-top: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.liste {
+  margin-top: 8px;
+}
+.rediger-knap {
+  background: #f3f6fb;
+  border: 0px solid #d6ddeb;
+  border-radius: 6px;
+  padding: 2px 6px;
+  cursor: pointer;
+  margin-right: 6px;
+  font-size: 1.0rem;
+}
+
+.rediger-knap:hover {
+  background: #e6ecf7;
+}
+
+.pizza-tooltip {
+  position: absolute;
+  max-width: 300px;
+  background: linear-gradient(180deg, #fffaf2 0%, #f6efe6 100%);
+  border: 1px solid #e2d6c3;
+  border-left: 4px solid #d97706; /* varm accent – pizza/chili */
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #3b2f1f;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.pizza-tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tooltip-title {
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #2a1f14;
+}
+
+.tooltip-desc {
+  color: #4b3b2a;
+}
+.app-logo {
+  position: relative;
+  top: -8px;   /* 👈 flyt op – justér tallet */
+}
+
+
+.app-logo img {
+  height: 100px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.app-logo img:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+@keyframes logo-click {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.9) rotate(-2deg); }
+  70%  { transform: scale(1.05) rotate(1deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+.app-logo img {
+  cursor: pointer;
+}
+
