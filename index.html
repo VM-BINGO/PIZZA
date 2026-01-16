@@ -30,6 +30,12 @@
   <button class="mobilepay-edit" title="Redigér MobilePay">
     ✏️
   </button>
+<img
+  src="mobilepay.logo.png"
+  alt="MobilePay"
+  class="mobilepay-logo"
+/>
+
 </div>
 
 
@@ -38,6 +44,10 @@
     <p><h2>U2</h2></p>
   </div>
 
+  <!-- 👇 LOGO SEKTION -->
+   <div class="app-logo">
+    <img src="logo.png" alt="JTR Solutions Logo">
+  </div>
 </header>
 
 
@@ -126,18 +136,26 @@
   <!-- LISTER -->
 <section class="card">
 
-  <div class="liste-header">
-    <h2>🍕 Bestillingsliste (Til pizzaria)
-    <span id="totalAntal" class="total-antal"></span>
- </h2>
- </div>
+  <!-- 🍕 Pizzaria-boks -->
+  <div class="liste-boks">
+    <div class="liste-header">
+      <h2>
+        🍕 Bestillingsliste (Til pizzaria)
+        <span id="totalAntal" class="total-antal"></span>
+      </h2>
+    </div>
 
-  <div id="samletListe" class="liste"></div>
+    <div id="samletListe" class="liste"></div>
+  </div>
 
-  <h2>👤 Bestillinger (Hvem har bestilt hvad)</h2>
-  <div id="bestillinger" class="liste"></div>
+  <!-- 👤 Intern boks -->
+  <div class="liste-boks">
+    <h2>👤 Bestillinger (Hvem har bestilt hvad)</h2>
+    <div id="bestillinger" class="liste"></div>
+  </div>
 
 </section>
+
 
 
   <!-- HANDLINGER -->
