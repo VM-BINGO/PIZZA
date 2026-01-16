@@ -2,6 +2,7 @@
 <html lang="da">
 <head>
   <meta charset="UTF-8">
+
   <title>Pizza Bestilling – U2</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -19,30 +20,49 @@
   <!-- HEADER -->
 <header class="app-header header-row">
 
-  <div
+ <div
   class="mobilepay-box"
   data-mobilepay-name="AB1234"
   data-mobilepay-box="123456"
 >
-  <div class="mobilepay-title">MOBILEPAY BOKS</div>
+  <!-- VENSTRE SIDE -->
+  <img
+  src="mplogo.png"
+  alt="MobilePay"
+  class="mobilepay-logo-wide"
+/>
   <div class="mobilepay-code">AB1234</div>
 
-  <button class="mobilepay-edit" title="Redigér MobilePay">
-    ✏️
-  </button>
-<img
-  src="mobilepay.logo.png"
-  alt="MobilePay"
-  class="mobilepay-logo"
-/>
+  <!-- HØJRE SIDE -->
+ <div class="mp-right">
+  <img
+    id="mpQrImage"
+    class="mobilepay-qr hidden"
+    alt="Scan for MobilePay"
+    onclick="openQrOverlay(this.src)"
+    style="cursor: pointer;"
+  >
 
+
+
+    <div class="mp-actions">
+      <button class="mobilepay-edit" title="Redigér MobilePay">✏️</button>
+      <button id="mpQrDelete" class="mp-qr-delete hidden" title="Fjern QR">✖</button>
+    </div>
+  </div>
 </div>
 
+<input
+  type="file"
+  id="mpQrUpload"
+  accept="image/*"
+  hidden
+/>
 
-  <div class="header-title">
-    <h1>🍕 Pizza Bestilling</h1>
-    <p><h2>U2</h2></p>
-  </div>
+<div class="app-logo-center" onclick="animateLogo()">
+  <img id="appLogoImg" src="sgreu2.png" alt="Pizza Bestilling U2">
+</div>
+
 
   <!-- 👇 LOGO SEKTION -->
    <div class="app-logo">
@@ -183,6 +203,11 @@
       Luk
     </button>
   </div>
+</div>
+
+
+<div id="qrOverlay" onclick="closeQrOverlay()">
+  <img id="qrOverlayImg" src="" alt="QR Large">
 </div>
 
 </body>
